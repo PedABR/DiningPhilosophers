@@ -44,6 +44,7 @@ public class PhilosopherMonitor implements Runnable {
 
     private void eat() {
         try {
+            System.out.println("Philosopher " + i + " is eating");
             Thread.sleep(eatingTime);
         }
         catch (InterruptedException e) {

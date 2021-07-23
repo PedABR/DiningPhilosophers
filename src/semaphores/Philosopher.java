@@ -11,7 +11,7 @@ public class Philosopher implements Runnable {
     private static int id = 0;
     private int i;
 
-    Philosopher(int thinkingTime, int eatingTime, Semaphore[] sem, int num) {
+    public Philosopher(int thinkingTime, int eatingTime, Semaphore[] sem, int num) {
         this.num = num;
         this.thinkingTime = thinkingTime;
         this.eatingTime = eatingTime;
@@ -24,9 +24,15 @@ public class Philosopher implements Runnable {
     public void run() {
         while (true) {
             think();
-            takeForks();
-            eat();
-            returnForks();
+            if (sem[i].tryAcquire()) {
+                if (sem[(i + 1) % num].tryAcquire()) {
+                    System.out.println("Philosopher " + i + " took the forks");
+                    eat();
+                    returnForks();
+                } else {
+                    sem[i].release();
+                }
+            }
         }
     }
 
@@ -41,22 +47,11 @@ public class Philosopher implements Runnable {
 
     private void eat() {
         try {
+            System.out.println("Philosopher " + i + " is eating");
             Thread.sleep(eatingTime);
         }
         catch (InterruptedException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void takeForks() {
-        try {
-            sem[i].acquire();
-            System.out.println("Philosopher " + i + " took the left fork");
-            sem[(i + 1) % num].acquire();
-            System.out.println("Philosopher " + i + " took the right fork");
-        }
-        catch (InterruptedException e) {
-            System.out.println("Philosopher " + i + " waiting to eat");
         }
     }
 
